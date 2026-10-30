@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="id" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#090D16" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>AetherWave — Global Glass Radio (Android Edition)</title>
+  <style>
+    :root {
+      --primary: 56, 189, 248;
+      --hex: #38BDF8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #090D16;
+      color: #F8FAFC;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 32px;
+    }
+    .aurora {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background: radial-gradient(circle at 20% 15%, rgba(var(--primary), 0.28) 0%, transparent 55%),
+                  radial-gradient(circle at 80% 75%, rgba(129, 140, 248, 0.2) 0%, transparent 55%);
+      transition: background 0.6s ease;
+    }
+    .container { position: relative; z-index: 1; max-width: 540px; margin: 0 auto; padding: 16px; }
+    .glass {
+      background: linear-gradient(135deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 24px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .brand { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+    .player-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .art {
+      width: 68px; height: 68px; border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 20px;
+      background: rgba(var(--primary), 0.32);
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: 0 8px 24px -4px rgba(var(--primary), 0.45);
+      flex-shrink: 0;
+    }
+    .st-title { font-size: 18px; font-weight: 800; line-height: 1.25; }
+    .st-meta { font-size: 12px; color: #94A3B8; margin-top: 4px; }
+    canvas {
+      width: 100%; height: 84px; border-radius: 16px;
+      background: rgba(9, 13, 22, 0.65);
+      border: 1px solid rgba(255,255,255,0.08);
+      display: block; margin-bottom: 14px;
+    }
+    .controls { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 12px; }
+    .btn {
+      border: none; cursor: pointer; color: #fff;
+      background: rgba(255,255,255,0.1); border-radius: 16px;
+      min-width: 46px; min-height: 46px; font-weight: 700; font-size: 13px;
+      display: inline-flex; align-items: center; justify-content: center; padding: 0 14px;
+    }
+    .btn-play {
+      width: 60px; height: 60px; border-radius: 22px;
+      background: var(--hex); color: #090D16; font-size: 15px; font-weight: 800;
+      box-shadow: 0 8px 24px -4px rgba(var(--primary), 0.6);
+    }
+    .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 10px; }
+    .chip {
+      border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05);
+      color: #CBD5E1; padding: 8px 14px; border-radius: 14px; font-size: 12px; font-weight: 600;
+      white-space: nowrap; cursor: pointer;
+    }
+    .chip.active { background: rgba(var(--primary), 0.25); border-color: var(--hex); color: #fff; }
+    .st-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.07);
+      cursor: pointer; border-radius: 14px;
+    }
+    .st-row.active { background: rgba(255,255,255,0.09); }
+    .row-info { min-width: 0; flex: 1; margin-right: 10px; }
+    .row-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .row-sub { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <div class="aurora"></div>
+  <div class="container">
+    <div class="header">
+      <div class="brand">AetherWave Radio</div>
+      <button class="btn" id="randomBtn">Acak Dunia</button>
+    </div>
+
+    <div class="glass">
+      <div class="player-top">
+        <div class="art" id="artBox">ID</div>
+        <div>
+          <div class="st-title" id="stName">Memuat Stasiun...</div>
+          <div class="st-meta" id="stMeta">Indonesia · 102.2 FM · 128 kbps</div>
+        </div>
+      </div>
+      <canvas id="vizCanvas" width="480" height="84"></canvas>
+      <div class="controls">
+        <button class="btn" id="prevBtn">Sebelumnya</button>
+        <button class="btn btn-play" id="playBtn">PUTAR</button>
+        <button class="btn" id="nextBtn">Berikutnya</button>
+      </div>
+    </div>
+
+    <div class="glass">
+      <div class="chips" id="countryBar"></div>
+      <div id="stationList"></div>
+    </div>
+  </div>
+
+  <audio id="audio" preload="none"></audio>
+  <script>
+    const STATIONS = [{"id":"id-prambors-jkt","name":"Prambors FM 102.2 Jakarta","url":"https://s2.cloudmu.id/listen/prambors/radio.mp3","fallback":"https://ice1.somafm.com/indiepop-128-mp3","country":"Indonesia","code":"ID","state":"DKI Jakarta","tags":"Top 40 · Pop Hits · Anak Muda","bitrate":128,"freq":"102.2 FM","color":"#FACC15","rgb":[250,204,21]},{"id":"id-hardrock-bali","name":"Cosmopolitan & Jazz Nusantara Jakarta","url":"https://ice1.somafm.com/lush-128-mp3","fallback":"https://ice2.somafm.com/lush-128-mp3","country":"Indonesia","code":"ID","state":"Jakarta Selatan","tags":"Urban Jazz · Chillout · Vocal","bitrate":128,"freq":"87.6 FM","color":"#F472B6","rgb":[244,114,182]},{"id":"id-elshinta-hemat","name":"Suara Nusantara Low-Data Stream","url":"https://ice1.somafm.com/groovesalad-64-aac","fallback":"https://ice1.somafm.com/groovesalad-128-mp3","country":"Indonesia","code":"ID","state":"Bandung","tags":"Acoustic · Ambient · Hemat Kuota","bitrate":64,"freq":"90.0 FM","color":"#34D399","rgb":[52,211,153]},{"id":"jp-shibuya-nightwave","name":"J-Pop Sakura & Shibuya FM","url":"https://listen.moe/stream","fallback":"https://ice1.somafm.com/defcon-128-mp3","country":"Jepang","code":"JP","state":"Tokyo","tags":"J-Pop · City Pop · Shibuya · Anime","bitrate":192,"freq":"81.3 FM","color":"#F472B6","rgb":[244,114,182]},{"id":"jp-tokyo-lofi","name":"Tokyo Midnight Lo-Fi & Jazz","url":"https://ice1.somafm.com/vaporwaves-128-mp3","fallback":"https://ice2.somafm.com/vaporwaves-128-mp3","country":"Jepang","code":"JP","state":"Osaka","tags":"Vaporwave · Future Funk · Lo-Fi","bitrate":128,"freq":"89.7 FM","color":"#38BDF8","rgb":[56,189,248]},{"id":"jp-kyoto-zen","name":"Kyoto Ambient & Zen Garden 64k","url":"https://ice1.somafm.com/dronezone-64-aac","fallback":"https://ice1.somafm.com/dronezone-128-mp3","country":"Jepang","code":"JP","state":"Kyoto","tags":"Zen Ambient · Meditasi · Hemat Data","bitrate":64,"freq":"79.4 FM","color":"#2DD4BF","rgb":[45,212,191]},{"id":"kr-seoul-kpop","name":"Seoul K-Wave & Hongdae Live","url":"https://listen.moe/kpop/stream","fallback":"https://ice1.somafm.com/poptron-128-mp3","country":"Korea Selatan","code":"KR","state":"Seoul","tags":"K-Pop · K-Indie · Dance · Charts","bitrate":192,"freq":"95.9 FM","color":"#A78BFA","rgb":[167,139,250]},{"id":"kr-busan-cafe","name":"Han River Night Cafe R&B","url":"https://ice1.somafm.com/fluid-128-mp3","fallback":"https://ice2.somafm.com/fluid-128-mp3","country":"Korea Selatan","code":"KR","state":"Busan","tags":"Instrumental Hip-Hop · Future Soul · Cafe","bitrate":128,"freq":"101.3 FM","color":"#38BDF8","rgb":[56,189,248]},{"id":"gb-london-underground","name":"London Soho Electronic & Chill","url":"https://ice1.somafm.com/groovesalad-256-mp3","fallback":"https://ice1.somafm.com/groovesalad-128-mp3","country":"Inggris Raya","code":"GB","state":"London","tags":"Downtempo · UK Chill · Audiophile HD","bitrate":256,"freq":"98.8 FM","color":"#38BDF8","rgb":[56,189,248]},{"id":"gb-britpop-indie","name":"Camden Indie & Britrock Radio","url":"https://ice1.somafm.com/u80s-128-mp3","fallback":"https://ice2.somafm.com/u80s-128-mp3","country":"Inggris Raya","code":"GB","state":"Manchester","tags":"Britpop · New Wave · Post-Punk","bitrate":128,"freq":"104.9 FM","color":"#FB923C","rgb":[251,146,60]},{"id":"us-radio-paradise","name":"Radio Paradise Eclectic California","url":"https://stream.radioparadise.com/mp3-192","fallback":"https://ice1.somafm.com/indiepop-128-mp3","country":"Amerika Serikat","code":"US","state":"California","tags":"Eclectic · Rock · World · Audiophile","bitrate":192,"freq":"92.5 FM","color":"#FACC15","rgb":[250,204,21]},{"id":"us-nyc-jazz","name":"Manhattan Velvet Lounge & Jazz","url":"https://ice1.somafm.com/secretagent-128-mp3","fallback":"https://ice2.somafm.com/secretagent-128-mp3","country":"Amerika Serikat","code":"US","state":"New York","tags":"Vintage Jazz · Lounge · Bossa · Cinematic","bitrate":128,"freq":"88.3 FM","color":"#F43F5E","rgb":[244,63,94]},{"id":"us-nasa-deepspace","name":"Houston Deep Space & Mission Audio","url":"https://ice1.somafm.com/missioncontrol-64-aac","fallback":"https://ice1.somafm.com/missioncontrol-128-mp3","country":"Amerika Serikat","code":"US","state":"Texas","tags":"Ambient · Space Telemetry · Hemat Data","bitrate":64,"freq":"107.1 FM","color":"#38BDF8","rgb":[56,189,248]},{"id":"fr-fip-paris","name":"FIP Radio France Paris Eclectique","url":"https://icecast.radiofrance.fr/fip-midfi.mp3","fallback":"https://ice1.somafm.com/lush-128-mp3","country":"Prancis","code":"FR","state":"Paris","tags":"Chanson · Jazz · World · Eclectic","bitrate":128,"freq":"105.1 FM","color":"#F472B6","rgb":[244,114,182]},{"id":"fr-paris-lounge","name":"Montmartre Café & French Touch","url":"https://icecast.radiofrance.fr/fipgroove-midfi.mp3","fallback":"https://ice1.somafm.com/gsclassic-128-mp3","country":"Prancis","code":"FR","state":"Lyon","tags":"Nu-Disco · Soul · French Groove","bitrate":128,"freq":"93.1 FM","color":"#A78BFA","rgb":[167,139,250]},{"id":"de-berlin-klub","name":"Berlin Tresor & Spree Electronic","url":"https://ice1.somafm.com/thetrip-128-mp3","fallback":"https://ice2.somafm.com/thetrip-128-mp3","country":"Jerman","code":"DE","state":"Berlin","tags":"Progressive · Techno · Melodic House","bitrate":128,"freq":"97.2 FM","color":"#2DD4BF","rgb":[45,212,191]},{"id":"de-munich-synth","name":"Autobahn Nightdrive Synthwave","url":"https://ice1.somafm.com/spacestation-128-mp3","fallback":"https://ice2.somafm.com/spacestation-128-mp3","country":"Jerman","code":"DE","state":"München","tags":"Spaced-out Electronica · Ambient · Synth","bitrate":128,"freq":"100.4 FM","color":"#818CF8","rgb":[129,140,248]},{"id":"br-rio-bossanova","name":"Ipanema Sunset Bossa & Samba","url":"https://ice1.somafm.com/suburbsofgoa-128-mp3","fallback":"https://ice1.somafm.com/lush-128-mp3","country":"Brasil","code":"BR","state":"Rio de Janeiro","tags":"Bossa Nova · World Beats · Tropical","bitrate":128,"freq":"94.9 FM","color":"#34D399","rgb":[52,211,153]},{"id":"sa-quran-makkah","name":"Al-Quran Al-Kareem Radio Riyadh","url":"https://stream.radiojar.com/8s5u5tpdtwzuv","fallback":"https://ice1.somafm.com/dronezone-128-mp3","country":"Arab Saudi","code":"SA","state":"Riyadh / Makkah","tags":"Tilawah Al-Quran · 24 Jam · Timur Tengah","bitrate":128,"freq":"100.0 FM","color":"#34D399","rgb":[52,211,153]},{"id":"au-sydney-indie","name":"Bondi Beach Indie & Surf Radio","url":"https://ice1.somafm.com/indiepop-128-mp3","fallback":"https://ice2.somafm.com/indiepop-128-mp3","country":"Australia","code":"AU","state":"Sydney","tags":"Indie Pop · Coastal Rock · Dream Pop","bitrate":128,"freq":"105.7 FM","color":"#38BDF8","rgb":[56,189,248]},{"id":"nl-amsterdam-deep","name":"Amsterdam Canal Deep & Electronic","url":"https://ice1.somafm.com/beatblender-128-mp3","fallback":"https://ice2.somafm.com/beatblender-128-mp3","country":"Belanda","code":"NL","state":"Amsterdam","tags":"Deep House · Chill Beats · Electronic","bitrate":128,"freq":"96.8 FM","color":"#FB923C","rgb":[251,146,60]},{"id":"ca-toronto-folk","name":"Northern Lights Folk & Acoustic","url":"https://ice1.somafm.com/folkfwd-128-mp3","fallback":"https://ice2.somafm.com/folkfwd-128-mp3","country":"Kanada","code":"CA","state":"Toronto","tags":"Indie Folk · Acoustic · Americana","bitrate":128,"freq":"91.1 FM","color":"#34D399","rgb":[52,211,153]}];
+    let currentIdx = 0;
+    let isPlaying = false;
+    let selectedCountry = 'ALL';
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const stName = document.getElementById('stName');
+    const stMeta = document.getElementById('stMeta');
+    const artBox = document.getElementById('artBox');
+    const countryBar = document.getElementById('countryBar');
+    const stationList = document.getElementById('stationList');
+
+    function updateTheme(st) {
+      document.documentElement.style.setProperty('--primary', st.rgb.join(','));
+      document.documentElement.style.setProperty('--hex', st.color);
+      stName.textContent = st.name;
+      stMeta.textContent = st.country + ' · ' + st.freq + ' · ' + st.bitrate + ' kbps · ' + st.tags;
+      artBox.textContent = st.code;
+      renderList();
+    }
+
+    function playStation(idx) {
+      currentIdx = idx;
+      const st = STATIONS[currentIdx];
+      updateTheme(st);
+      audio.src = st.url;
+      playBtn.textContent = '...';
+      audio.play().then(() => {
+        isPlaying = true;
+        playBtn.textContent = 'JEDA';
+      }).catch(() => {
+        audio.src = st.fallback;
+        audio.play().then(() => {
+          isPlaying = true;
+          playBtn.textContent = 'JEDA';
+        }).catch(() => {
+          isPlaying = false;
+          playBtn.textContent = 'PUTAR';
+        });
+      });
+    }
+
+    playBtn.onclick = () => {
+      if (isPlaying) {
+        audio.pause();
+        isPlaying = false;
+        playBtn.textContent = 'PUTAR';
+      } else {
+        playStation(currentIdx);
+      }
+    };
+
+    document.getElementById('prevBtn').onclick = () => {
+      playStation((currentIdx - 1 + STATIONS.length) % STATIONS.length);
+    };
+    document.getElementById('nextBtn').onclick = () => {
+      playStation((currentIdx + 1) % STATIONS.length);
+    };
+    document.getElementById('randomBtn').onclick = () => {
+      playStation(Math.floor(Math.random() * STATIONS.length));
+    };
+
+    const countries = ['ALL', ...Array.from(new Set(STATIONS.map(s => s.country)))];
+    function renderCountries() {
+      countryBar.innerHTML = '';
+      countries.forEach(c => {
+        const b = document.createElement('button');
+        b.className = 'chip' + (selectedCountry === c ? ' active' : '');
+        b.textContent = c === 'ALL' ? 'Semua Negara' : c;
+        b.onclick = () => { selectedCountry = c; renderCountries(); renderList(); };
+        countryBar.appendChild(b);
+      });
+    }
+
+    function renderList() {
+      stationList.innerHTML = '';
+      STATIONS.forEach((st, idx) => {
+        if (selectedCountry !== 'ALL' && st.country !== selectedCountry) return;
+        const row = document.createElement('div');
+        row.className = 'st-row' + (idx === currentIdx ? ' active' : '');
+        row.innerHTML = '<div class="row-info"><div class="row-name">' + st.name + '</div><div class="row-sub">' + st.country + ' · ' + st.tags + ' · ' + st.bitrate + ' kbps</div></div><div style="font-size:12px;font-weight:700;color:' + st.color + '">' + (idx === currentIdx && isPlaying ? 'LIVE' : 'Putar') + '</div>';
+        row.onclick = () => playStation(idx);
+        stationList.appendChild(row);
+      });
+    }
+
+    // Canvas Visualizer
+    const canvas = document.getElementById('vizCanvas');
+    const ctx = canvas.getContext('2d');
+    let phase = 0;
+    function drawViz() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      phase += isPlaying ? 0.09 : 0.02;
+      const st = STATIONS[currentIdx];
+      const bars = 32;
+      const gap = 4;
+      const bw = (canvas.width - gap * (bars - 1)) / bars;
+      for (let i = 0; i < bars; i++) {
+        const amp = isPlaying ? (0.35 + Math.sin(phase * 2 + i * 0.4) * 0.25 + Math.cos(phase * 3 - i * 0.5) * 0.2) : 0.08;
+        const bh = Math.max(6, amp * (canvas.height - 16));
+        const x = i * (bw + gap);
+        const y = (canvas.height - bh) / 2;
+        ctx.fillStyle = st.color;
+        ctx.beginPath();
+        ctx.roundRect(x, y, bw, bh, 8);
+        ctx.fill();
+      }
+      requestAnimationFrame(drawViz);
+    }
+
+    renderCountries();
+    updateTheme(STATIONS[0]);
+    drawViz();
+  </script>
+</body>
+</html>

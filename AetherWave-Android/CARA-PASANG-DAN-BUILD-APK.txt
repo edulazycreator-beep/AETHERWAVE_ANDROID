@@ -1,0 +1,22 @@
+======================================================================
+AETHERWAVE — GLOBAL GLASS RADIO (PAKET APLIKASI ANDROID)
+======================================================================
+
+Di dalam paket ZIP ini sudah tersedia:
+1. File langsung pakai di HP Android tanpa perlu kompilasi:
+   -> app/src/main/assets/index.html
+   (Kirim file tersebut ke HP Android Anda via WhatsApp/Telegram lalu buka
+    di Chrome Android untuk langsung mendengarkan radio dunia!)
+
+2. Proyek lengkap Android Studio + GitHub Actions Otomatis (.apk):
+   - Cara Termudah Tanpa Android Studio (Gratis via GitHub):
+     a) Buat repository baru di GitHub dan unggah isi folder ini.
+     b) Buka tab "Actions" di GitHub repository Anda.
+     c) GitHub Actions (.github/workflows/build-apk.yml) akan otomatis
+        mengompilasi dan menghasilkan file "AetherWave-debug.apk" yang
+        siap Anda unduh dan instal di HP Android!
+
+   - Cara via Android Studio:
+     a) Buka folder "AetherWave-Android" di Android Studio.
+     b) Klik menu Build > Build Bundle(s) / APK(s) > Build APK(s).
+======================================================================
